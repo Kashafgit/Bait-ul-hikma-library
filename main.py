@@ -41,20 +41,22 @@ def add_book():
 def remove_book():
     st.subheader("❌ Remove a Book")
     title = st.text_input("Enter the title of the book you want to remove")
-    if st.button("🗑️ Remove Book"):
-        conn = sqlite3.connect("text.db")
-        cursor = conn.cursor()
-        
-        # Delete book (case insensitive)
-        cursor.execute("DELETE FROM text WHERE LOWER(title) = LOWER(?)", (title,))
-        conn.commit()
 
-        # Check how many rows were deleted
-        if cursor.rowcount > 0:
+    if st.button("🗑️ Remove Book"):
+        conn = sqlite3.connect("text.db", check_same_thread=False)
+        cursor = conn.cursor()
+
+
+        cursor.execute("SELECT * FROM text WHERE LOWER(title) = LOWER(?)", (title,))
+        book_exists = cursor.fetchone()
+
+        if book_exists:
+            cursor.execute("DELETE FROM text WHERE LOWER(title) = LOWER(?)", (title,))
+            conn.commit()
             st.success("✅ Book removed successfully")
         else:
             st.error("❌ Book not found")
-        
+
         conn.close()
 
 def search_book():
